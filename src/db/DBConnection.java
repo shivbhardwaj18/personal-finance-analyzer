@@ -30,6 +30,8 @@ public class DBConnection {
     private static DBConnection instance;
     private Connection connection;
 
+    private boolean isDemoMode = false;
+
     // ── Private constructor — bootstraps DB schema ─────────────────────────
     private DBConnection() {
         try {
@@ -37,11 +39,15 @@ public class DBConnection {
             bootstrapSchema();
             connection = DriverManager.getConnection(APP_URL, USER, PASSWORD);
             System.out.println("[DBConnection] Connected to finance_app successfully.");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("MySQL JDBC Driver not found. Add mysql-connector-j to lib/.", e);
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to connect to MySQL: " + e.getMessage(), e);
+        } catch (Exception e) {
+            System.err.println("[DBConnection] MySQL Connection Failed: " + e.getMessage());
+            System.err.println("[DBConnection] Switching to in-memory Demo Mode.");
+            isDemoMode = true;
         }
+    }
+
+    public boolean isDemoMode() {
+        return isDemoMode;
     }
 
     /**

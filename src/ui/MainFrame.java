@@ -1,5 +1,6 @@
 package ui;
 
+import db.DBConnection;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
@@ -114,7 +115,8 @@ public class MainFrame extends JFrame {
         JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 0));
         right.setOpaque(false);
 
-        JLabel badge = makeBadge("● OFFLINE", GREEN);
+        boolean isDemo = DBConnection.getInstance().isDemoMode();
+        JLabel badge = makeBadge(isDemo ? "● DEMO MODE" : "● OFFLINE", isDemo ? YELLOW : GREEN);
         clockLabel = new JLabel("--:--:--");
         clockLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
         clockLabel.setForeground(SUBTEXT0);
@@ -323,11 +325,14 @@ public class MainFrame extends JFrame {
         JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         left.setOpaque(false);
 
+        boolean isDemo = DBConnection.getInstance().isDemoMode();
         JLabel dot = new JLabel("●");
-        dot.setForeground(GREEN);
+        dot.setForeground(isDemo ? YELLOW : GREEN);
         dot.setFont(new Font("Segoe UI", Font.PLAIN, 10));
 
-        statusLabel = new JLabel("Ready — Connected to finance_app database.");
+        statusLabel = new JLabel(isDemo
+            ? "⚠️ MySQL Connection Failed — Running in Offline Demo Mode (Changes are not saved)."
+            : "Ready — Connected to finance_app database.");
         statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         statusLabel.setForeground(SUBTEXT0);
 

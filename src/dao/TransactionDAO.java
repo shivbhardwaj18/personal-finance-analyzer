@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Data Access Object for the transactions table.
@@ -22,6 +23,18 @@ import java.util.Map;
  *   [UI] → [TransactionDAO] → [DBConnection.getConnection()] → [MySQL]
  */
 public class TransactionDAO {
+
+    private static final List<Transaction> demoTransactions = new ArrayList<>();
+
+    static {
+        // Pre-populate with clean demo data so the app starts with data immediately for the recruiter
+        demoTransactions.add(new Transaction(1, 55000.0, "Other", "INCOME", LocalDate.now().minusDays(10), "Monthly Salary Credit"));
+        demoTransactions.add(new Transaction(2, 12000.0, "Bills", "EXPENSE", LocalDate.now().minusDays(8), "Apartment Rent"));
+        demoTransactions.add(new Transaction(3, 3500.0, "Food", "EXPENSE", LocalDate.now().minusDays(5), "Zomato dinner & grocery order"));
+        demoTransactions.add(new Transaction(4, 4500.0, "Shopping", "EXPENSE", LocalDate.now().minusDays(3), "Shopping at H&M"));
+        demoTransactions.add(new Transaction(5, 1800.0, "Travel", "EXPENSE", LocalDate.now().minusDays(2), "Uber ride & fuel refuel"));
+        demoTransactions.add(new Transaction(6, 1200.0, "Entertainment", "EXPENSE", LocalDate.now().minusDays(1), "Movie tickets & snacks"));
+    }
 
     private Connection conn() {
         return DBConnection.getInstance().getConnection();
@@ -33,6 +46,12 @@ public class TransactionDAO {
      * @param t Transaction without id (id is auto-assigned by DB)
      */
     public void insert(Transaction t) {
+        if (DBConnection.getInstance().isDemoMode()) {
+            int nextId = demoTransactions.stream().mapToInt(Transaction::getId).max().orElse(0) + 1;
+            t.setId(nextId);
+            demoTransactions.add(0, t); // add to top
+            return;
+        }
         String sql = "INSERT INTO transactions (amount, category, type, date, description) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setDouble(1, t.getAmount());
@@ -53,6 +72,9 @@ public class TransactionDAO {
     // ── FETCH ALL ──────────────────────────────────────────────────────────
     /** Returns all transactions ordered newest first. */
     public List<Transaction> fetchAll() {
+        if (DBConnection.getInstance().isDemoMode()) {
+            return new ArrayList<>(demoTransactions);
+        }
         List<Transaction> list = new ArrayList<>();
         String sql = "SELECT * FROM transactions ORDER BY date DESC, id DESC";
         try (Statement st = conn().createStatement();
@@ -69,6 +91,15 @@ public class TransactionDAO {
     // ── UPDATE ─────────────────────────────────────────────────────────────
     /** Updates an existing transaction by its id. */
     public void update(Transaction t) {
+        if (DBConnection.getInstance().isDemoMode()) {
+            for (int i = 0; i < demoTransactions.size(); i++) {
+                if (demoTransactions.get(i).getId() == t.getId()) {
+                    demoTransactions.set(i, t);
+                    return;
+                }
+            }
+            return;
+        }
         String sql = "UPDATE transactions SET amount=?, category=?, type=?, date=?, description=? WHERE id=?";
         try (PreparedStatement ps = conn().prepareStatement(sql)) {
             ps.setDouble(1, t.getAmount());
@@ -86,6 +117,10 @@ public class TransactionDAO {
     // ── DELETE ─────────────────────────────────────────────────────────────
     /** Deletes a transaction by id. */
     public void delete(int id) {
+        if (DBConnection.getInstance().isDemoMode()) {
+            demoTransactions.removeIf(t -> t.getId() == id);
+            return;
+        }
         String sql = "DELETE FROM transactions WHERE id=?";
         try (PreparedStatement ps = conn().prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -103,6 +138,14 @@ public class TransactionDAO {
      * @return Map: category → total expense amount
      */
     public Map<String, Double> fetchByCategory() {
+        if (DBConnection.getInstance().isDemoMode()) {
+            return demoTransactions.stream()
+                .filter(t -> "EXPENSE".equals(t.getType()))
+                .collect(Collectors.groupingBy(Transaction::getCategory, Collectors.summingDouble(Transaction::getAmount)))
+                .entrySet().stream()
+                .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        }
         Map<String, Double> map = new LinkedHashMap<>();
         String sql = """
             SELECT category, SUM(amount) AS total
@@ -130,6 +173,16 @@ public class TransactionDAO {
      * @return Map: "YYYY-MM" → total expense amount (sorted oldest→newest)
      */
     public Map<String, Double> fetchByMonth() {
+        if (DBConnection.getInstance().isDemoMode()) {
+            java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM");
+            LocalDate sixMonthsAgo = LocalDate.now().minusMonths(6);
+            return demoTransactions.stream()
+                .filter(t -> "EXPENSE".equals(t.getType()) && !t.getDate().isBefore(sixMonthsAgo))
+                .collect(Collectors.groupingBy(t -> t.getDate().format(fmt), Collectors.summingDouble(Transaction::getAmount)))
+                .entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        }
         Map<String, Double> map = new LinkedHashMap<>();
         String sql = """
             SELECT DATE_FORMAT(date, '%Y-%m') AS month, SUM(amount) AS total
