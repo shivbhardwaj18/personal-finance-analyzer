@@ -1,0 +1,36 @@
+# ─── Java compiled output ──────────────────────────────────
+*.class
+*.jar
+out/
+build/
+target/
+
+# ─── IntelliJ IDEA project files ──────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# ─── OS generated ──────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Logs ──────────────────────────────────────────────────
+*.log
+hs_err_pid*.log
+
+# ─── Environment / secrets ─────────────────────────────────
+*.env
+secrets.properties
+
+# ─── JARs in lib/ are committed intentionally ──────────────
+# (They are small enough and needed for build without Maven/Gradle)
+# If you add Maven/Gradle, uncomment below:
+# lib/
+
+# ─── Temporary files ───────────────────────────────────────
+*.tmp
+*.bak
+*.swp
+~$*
