@@ -117,8 +117,12 @@ public class DashboardPanel extends JPanel {
 
         incomeSub.setText(incomeCount + " transactions");
         expenseSub.setText(expenseCount + " transactions");
-        balanceSub.setText(balance >= 0 ? "📈 Positive" : "📉 Negative");
-        balanceSub.setForeground(balance >= 0 ? GREEN : RED);
+        boolean isPos = balance >= 0;
+        balanceSub.setIcon(new TrendIcon(isPos, isPos ? GREEN : RED));
+        balanceSub.setText(isPos ? "Positive" : "Negative");
+        balanceSub.setForeground(isPos ? GREEN : RED);
+        balanceSub.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        balanceSub.setIconTextGap(5);
 
         chartArea.removeAll();
         chartArea.add(wrapChart("📊", "Spending by Category", buildPieChart(dao.fetchByCategory())));
@@ -367,5 +371,37 @@ public class DashboardPanel extends JPanel {
             g2.dispose();
         }
         @Override public Insets getBorderInsets(Component c) { return new Insets(radius/2, radius/2, radius/2, radius/2); }
+    }
+
+    // ── Trend indicator icon (green ▲ up / red ▼ down) ─────────────────────
+    static class TrendIcon implements Icon {
+        private final boolean up;
+        private final Color color;
+
+        TrendIcon(boolean up, Color color) {
+            this.up = up;
+            this.color = color;
+        }
+
+        @Override public int getIconWidth() { return 10; }
+        @Override public int getIconHeight() { return 10; }
+
+        @Override public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(color);
+            Polygon p = new Polygon();
+            if (up) {
+                p.addPoint(x + 5, y + 1);
+                p.addPoint(x + 1, y + 8);
+                p.addPoint(x + 9, y + 8);
+            } else {
+                p.addPoint(x + 1, y + 2);
+                p.addPoint(x + 9, y + 2);
+                p.addPoint(x + 5, y + 9);
+            }
+            g2.fillPolygon(p);
+            g2.dispose();
+        }
     }
 }

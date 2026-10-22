@@ -310,7 +310,7 @@ public class AIInsightsPanel extends JPanel {
     }
 
     private JButton buildRefreshButton() {
-        JButton b = new JButton("🔄  Refresh") {
+        JButton b = new JButton("Refresh") {
             private boolean hov = false;
             { addMouseListener(new MouseAdapter() {
                 @Override public void mouseEntered(MouseEvent e) { hov = true;  repaint(); }
@@ -325,6 +325,8 @@ public class AIInsightsPanel extends JPanel {
                 super.paintComponent(g);
             }
         };
+        b.setIcon(new RefreshIcon(14, TEAL));
+        b.setIconTextGap(7);
         b.setFont(new Font("Segoe UI", Font.BOLD, 13));
         b.setForeground(TEAL);
         b.setContentAreaFilled(false);
@@ -333,11 +335,42 @@ public class AIInsightsPanel extends JPanel {
         b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         b.setBorder(new CompoundBorder(
             new DashboardPanel.RoundedBorder(TEAL.darker(), 10, 1),
-            BorderFactory.createEmptyBorder(8, 18, 8, 18)
+            BorderFactory.createEmptyBorder(7, 16, 7, 16)
         ));
         b.setOpaque(false);
         b.addActionListener(e -> refresh());
         return b;
+    }
+
+    // ── Vector Refresh circular arrow icon ────────────────────────────────
+    private static class RefreshIcon implements Icon {
+        private final int size;
+        private final Color color;
+
+        RefreshIcon(int size, Color color) {
+            this.size = size;
+            this.color = color;
+        }
+
+        @Override public int getIconWidth() { return size; }
+        @Override public int getIconHeight() { return size; }
+
+        @Override public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(color);
+            g2.setStroke(new BasicStroke(1.8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+            // Circular arc clockwise
+            g2.drawArc(x + 2, y + 2, 10, 10, 60, -280);
+
+            // Arrowhead at top pointing clockwise
+            int tx = x + 8, ty = y + 2;
+            g2.drawLine(tx, ty, tx - 4, ty - 3);
+            g2.drawLine(tx, ty, tx - 3, ty + 3);
+
+            g2.dispose();
+        }
     }
 
     private String escHtml(String s) {

@@ -196,8 +196,8 @@ public class MainFrame extends JFrame {
         sidebar.add(Box.createVerticalStrut(12));
 
         // Footer info
-        JLabel ver = buildSideFooter("⚡ v1.0.0  |  Java 17+");
-        JLabel db  = buildSideFooter("🗄 MySQL · finance_app");
+        JLabel ver = buildSideFooter("● v1.0.0  |  Java 17+");
+        JLabel db  = buildSideFooter("◈ MySQL · finance_app");
         sidebar.add(ver);
         sidebar.add(Box.createVerticalStrut(4));
         sidebar.add(db);
@@ -276,7 +276,7 @@ public class MainFrame extends JFrame {
             if (card.equals(CARD_DASHBOARD))    dashboardPanel.refresh();
             if (card.equals(CARD_AI))           aiInsightsPanel.refresh();
             if (card.equals(CARD_TRANSACTIONS)) transactionForm.loadTable();
-            setStatus("📍 Viewing: " + label);
+            setStatus("Viewing: " + label);
         });
         return b;
     }
