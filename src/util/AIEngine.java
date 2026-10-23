@@ -28,6 +28,11 @@ public class AIEngine {
         if (description == null || description.isBlank()) return "Other";
         String lower = description.toLowerCase();
 
+        if (matches(lower, "salary", "stipend", "bonus", "payroll", "paycheck", "wages", "incentive", "overtime",
+                    "freelance", "papa", "mami", "mummy", "mom", "dad", "father", "mother", "didi", "bhai",
+                    "gift", "pocket", "allowance", "shagun", "interest", "dividend", "income"))
+            return "Income";
+
         if (matches(lower, "pizza", "burger", "swiggy", "zomato", "restaurant",
                     "cafe", "food", "lunch", "dinner", "breakfast", "snack",
                     "dominos", "kfc", "mcdonalds", "biryani", "sushi"))
@@ -54,6 +59,17 @@ public class AIEngine {
             return "Entertainment";
 
         return "Other";
+    }
+
+    /**
+     * Overloaded auto-categorizer that distinguishes between Income and Expense.
+     * When isIncome is true, returns "Income".
+     */
+    public static String autoCategorize(String description, boolean isIncome) {
+        if (isIncome) {
+            return "Income";
+        }
+        return autoCategorize(description);
     }
 
     private static boolean matches(String text, String... keywords) {

@@ -34,10 +34,10 @@ public class TransactionForm extends JPanel {
     private static final Color MAUVE    = MainFrame.MAUVE;
     private static final Color TEAL     = MainFrame.TEAL;
 
-    private static final String[] CATEGORIES = {"🍕 Food","✈️ Travel","🛍️ Shopping","🧾 Bills","🎬 Entertainment","📦 Other"};
-    private static final String[] CAT_VALUES  = {"Food","Travel","Shopping","Bills","Entertainment","Other"};
-    private static final String[] TYPES       = {"💸 EXPENSE","💰 INCOME"};
-    private static final String[] TYPE_VALUES = {"EXPENSE","INCOME"};
+    private static final String[] CATEGORIES = {"🍕 Food", "✈️ Travel", "🛍️ Shopping", "🧾 Bills", "🎬 Entertainment", "💵 Income", "📦 Other"};
+    private static final String[] CAT_VALUES  = {"Food", "Travel", "Shopping", "Bills", "Entertainment", "Income", "Other"};
+    private static final String[] TYPES       = {"💸 EXPENSE", "💰 INCOME"};
+    private static final String[] TYPE_VALUES = {"EXPENSE", "INCOME"};
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final Font LABEL_FONT = new Font("Segoe UI Emoji", Font.BOLD, 12);
@@ -122,6 +122,21 @@ public class TransactionForm extends JPanel {
         gbc.gridx = 0; gbc.weightx = 0.3; card.add(amountField, gbc);
 
         typeBox = styledCombo(TYPES);
+        typeBox.addActionListener(e -> {
+            if (!isProgrammaticChange) {
+                if (typeBox.getSelectedIndex() == 1) { // 💰 INCOME selected
+                    isProgrammaticChange = true;
+                    categoryBox.setSelectedItem("💵 Income");
+                    isProgrammaticChange = false;
+                } else { // 💸 EXPENSE selected
+                    if ("💵 Income".equals(categoryBox.getSelectedItem())) {
+                        isProgrammaticChange = true;
+                        categoryBox.setSelectedIndex(0); // 🍕 Food
+                        isProgrammaticChange = false;
+                    }
+                }
+            }
+        });
         gbc.gridx = 1; gbc.weightx = 0.3; card.add(typeBox, gbc);
 
         dateField = styledField(LocalDate.now().format(DATE_FMT));
@@ -139,6 +154,11 @@ public class TransactionForm extends JPanel {
         categoryBox.addActionListener(e -> {
             if (!isProgrammaticChange) {
                 categoryManuallyChanged = true;
+                if ("💵 Income".equals(categoryBox.getSelectedItem())) {
+                    isProgrammaticChange = true;
+                    typeBox.setSelectedIndex(1); // 💰 INCOME
+                    isProgrammaticChange = false;
+                }
             }
         });
         gbc.gridx = 0; gbc.weightx = 0.3; gbc.gridwidth = 1; card.add(categoryBox, gbc);
@@ -266,11 +286,15 @@ public class TransactionForm extends JPanel {
         if (categoryManuallyChanged) return;
         String desc = descField.getText().trim();
         if (!desc.isEmpty()) {
-            String cat = AIEngine.autoCategorize(desc);
+            boolean isIncome = typeBox.getSelectedIndex() == 1;
+            String cat = AIEngine.autoCategorize(desc, isIncome);
             for (int i = 0; i < CAT_VALUES.length; i++) {
-                if (CAT_VALUES[i].equals(cat)) {
+                if (CAT_VALUES[i].equalsIgnoreCase(cat)) {
                     isProgrammaticChange = true;
                     categoryBox.setSelectedIndex(i);
+                    if ("Income".equalsIgnoreCase(cat)) {
+                        typeBox.setSelectedIndex(1); // 💰 INCOME
+                    }
                     isProgrammaticChange = false;
                     break;
                 }
@@ -288,17 +312,25 @@ public class TransactionForm extends JPanel {
         int modelRow = txTable.getTable().convertRowIndexToModel(viewRow);
 
         amountField.setText(String.valueOf(m.getValueAt(modelRow, 1)));
+
         String cat = m.getValueAt(modelRow, 2).toString();
         isProgrammaticChange = true;
         for (int i = 0; i < CAT_VALUES.length; i++) {
-            if (CAT_VALUES[i].equals(cat)) { categoryBox.setSelectedIndex(i); break; }
+            if (CAT_VALUES[i].equalsIgnoreCase(cat)) {
+                categoryBox.setSelectedIndex(i);
+                break;
+            }
         }
         String type = m.getValueAt(modelRow, 3).toString();
         for (int i = 0; i < TYPE_VALUES.length; i++) {
-            if (TYPE_VALUES[i].equals(type)) { typeBox.setSelectedIndex(i); break; }
+            if (TYPE_VALUES[i].equalsIgnoreCase(type)) {
+                typeBox.setSelectedIndex(i);
+                break;
+            }
         }
         isProgrammaticChange = false;
         categoryManuallyChanged = false;
+
         dateField.setText(m.getValueAt(modelRow, 4).toString());
         descField.setText(m.getValueAt(modelRow, 5).toString());
 
