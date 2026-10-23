@@ -12,7 +12,7 @@ A Java desktop application for managing transactions, visualizing spending, and 
 ![JFreeChart](https://img.shields.io/badge/Charts-JFreeChart%201.5.4-7E57C2)
 ![Architecture](https://img.shields.io/badge/Architecture-MVC-2E8B57)
 ![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen.svg)
-![License](https://img.shields.io/badge/License-Add%20LICENSE%20file-lightgrey)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 </div>
 
@@ -275,7 +275,9 @@ Suggestions, bug reports, and pull requests are welcome.
 
 ## License
 
-No specific license was provided in the project details. Add a `LICENSE` file before choosing a license badge or accepting contributions under defined terms. Once the license is selected, update the badge at the top of this README to name it.
+This project is licensed under the **MIT License**. You are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the software, provided that the copyright and permission notice are included with those copies.
+
+The software is provided **"as is"**, without warranty of any kind. See the [`LICENSE`](LICENSE) file for the complete terms.
 
 ---
 
