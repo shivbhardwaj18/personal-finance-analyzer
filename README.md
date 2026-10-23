@@ -46,7 +46,6 @@ Review smart spending alerts and category-level next-month estimates based on a 
 
 ![AI Financial Insights Screenshot](screenshots/ai-insights.png)
 
-> **Add your screenshots:** Create a folder named `screenshots` beside this README, save your three images as `dashboard.png`, `transactions.png`, and `ai-insights.png`, and commit the files. GitHub will render them automatically. If you use different filenames, update the paths above.
 
 ## Features
 
